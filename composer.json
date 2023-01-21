@@ -1,0 +1,39 @@
+{
+  "name": "vecode/caldera-queue",
+  "description": "Job queue layer, part of Vecode Caldera",
+  "version": "1.0",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "biohzrdmx",
+      "email": "hi@biohzrdmx.me",
+      "homepage": "https://biohzrdmx.me"
+    }
+  ],
+  "require": {
+    "php": ">=8.1",
+    "ext-mbstring": "*"
+  },
+  "require-dev": {
+    "vecode/caldera-database": "^1.3",
+    "predis/predis": "^2.1",
+    "vecode/caldera-orm": "^1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Caldera\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Caldera\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "analyse": "phpstan analyse --configuration phpstan.neon --memory-limit 1G --level 7 src",
+    "coverage": "phpunit --coverage-text",
+    "test": "phpunit --testdox"
+  },
+  "minimum-stability": "stable"
+}
