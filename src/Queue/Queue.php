@@ -22,9 +22,8 @@ class Queue {
 
     /**
      * Queue Adapter
-     * @var AdapterInterface
      */
-    protected $adapter;
+    protected AdapterInterface $adapter;
 
     /**
      * Constructor
@@ -39,7 +38,6 @@ class Queue {
 
     /**
      * Get queue adapter
-     * @return AdapterInterface
      */
     public function getAdapter(): AdapterInterface {
         return $this->adapter;
@@ -49,7 +47,6 @@ class Queue {
      * Add a job to the queue
      * @param  string $type Job type
      * @param  mixed  $data Job data
-     * @return string
      */
     public function add(string $type, $data): string {
         return $this->adapter->add($type, $data);
@@ -57,7 +54,6 @@ class Queue {
 
     /**
      * Get a pending job to work on it
-     * @return JobInterface
      */
     public function get(): ?JobInterface {
         return $this->adapter->get();
@@ -66,7 +62,6 @@ class Queue {
     /**
      * Get pending jobs
      * @param  string $type Job type
-     * @return int
      */
     public function pending(string $type = ''): int {
         return $this->adapter->pending($type);
@@ -96,7 +91,6 @@ class Queue {
      * Do queue work
      * @param  Closure $callback Callback closure
      * @param  Closure $complete Completion closure
-     * @return void
      */
     public function work(Closure $callback = null, Closure $complete = null): void {
         while (true) {

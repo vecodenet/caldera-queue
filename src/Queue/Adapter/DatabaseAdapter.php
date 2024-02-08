@@ -26,21 +26,18 @@ class DatabaseAdapter extends AbstractAdapter {
 
     /**
      * Table name
-     * @var string
      */
-    protected $table = 'queue';
+    protected string $table = 'queue';
 
     /**
      * Column name
-     * @var string
      */
-    protected $column = 'uid';
+    protected string $column = 'uid';
 
     /**
      * Database instance
-     * @var Database
      */
-    protected $database;
+    protected Database $database;
 
     /**
      * Constructor
@@ -54,10 +51,7 @@ class DatabaseAdapter extends AbstractAdapter {
     }
 
     /**
-     * Add a job to the queue
-     * @param  string $type Job type
-     * @param  mixed  $data Job data
-     * @return string
+     * @inheritdoc
      */
     public function add(string $type, $data): string {
         $ret = null;
@@ -81,8 +75,7 @@ class DatabaseAdapter extends AbstractAdapter {
     }
 
     /**
-     * Get a pending job to work on it
-     * @return ?JobInterface
+     * @inheritdoc
      */
     public function get(): ?JobInterface {
         $ret = null;
@@ -97,12 +90,12 @@ class DatabaseAdapter extends AbstractAdapter {
                 ->where('id', $item->id)
                 ->update(['status' => 'Working']);
             if ( class_exists($item->type) ) {
-                $ret = new $item->type($item->uid, @unserialize($item->data), (int) $item->retries);
+                $ret = new $item->type($item->{$this->column}, @unserialize($item->data), (int) $item->retries);
                 if ($ret instanceof QueueAwareInterface) {
                     $ret->setQueue($this->queue);
                 }
                 if (! $ret instanceof JobInterface ) {
-                    $this->failed($item->uid);
+                    $this->failed($item->{$this->column});
                     throw new RuntimeException('Invalid job type');
                 }
             }
@@ -111,9 +104,7 @@ class DatabaseAdapter extends AbstractAdapter {
     }
 
     /**
-     * Delete the specified job from the queue (as it is completed)
-     * @param  string $uid Job identifier
-     * @return void
+     * @inheritdoc
      */
     public function complete(string $uid): void {
         $query = new Query($this->database);
@@ -123,9 +114,7 @@ class DatabaseAdapter extends AbstractAdapter {
     }
 
     /**
-     * Mark the specified job as failed
-     * @param  string $uid Job identifier
-     * @return void
+     * @inheritdoc
      */
     public function failed(string $uid): void {
         $query = new Query($this->database);
@@ -135,9 +124,7 @@ class DatabaseAdapter extends AbstractAdapter {
     }
 
     /**
-     * Retry an specific job
-     * @param  string $uid Job identifier
-     * @return void
+     * @inheritdoc
      */
     public function retry(string $uid): void {
         $query = new Query($this->database);
@@ -147,9 +134,7 @@ class DatabaseAdapter extends AbstractAdapter {
     }
 
     /**
-     * Get the pending job count
-     * @param  string $type Job typeq
-     * @return int
+     * @inheritdoc
      */
     public function pending(string $type = ''): int {
         $ret = 0;
@@ -163,9 +148,7 @@ class DatabaseAdapter extends AbstractAdapter {
     }
 
     /**
-     * Reset failed jobs
-     * @param  string $type Job type
-     * @return void
+     * @inheritdoc
      */
     public function reset(string $type = ''): void {
         $query = new Query($this->database);
@@ -177,9 +160,7 @@ class DatabaseAdapter extends AbstractAdapter {
     }
 
     /**
-     * Purge failed jobs
-     * @param  string $type Job type
-     * @return void
+     * @inheritdoc
      */
     public function purge(string $type = ''): void {
         $query = new Query($this->database);
@@ -192,7 +173,6 @@ class DatabaseAdapter extends AbstractAdapter {
 
     /**
      * Create the jobs table
-     * @return void
      */
     protected function createTable(): void {
         $schema = new Schema($this->database);

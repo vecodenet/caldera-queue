@@ -21,7 +21,6 @@ abstract class AbstractAdapter implements AdapterInterface, QueueAwareInterface 
 
     /**
      * Generate an UID
-     * @return string
      */
     protected function generateUID(): string {
         $data = random_bytes(16);

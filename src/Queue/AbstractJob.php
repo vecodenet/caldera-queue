@@ -14,6 +14,7 @@ namespace Caldera\Queue;
 use Caldera\Queue\QueueAware;
 use Caldera\Queue\QueueAwareInterface;
 use Caldera\Queue\JobInterface;
+use InvalidArgumentException;
 
 abstract class AbstractJob implements JobInterface, QueueAwareInterface {
 
@@ -21,27 +22,23 @@ abstract class AbstractJob implements JobInterface, QueueAwareInterface {
 
     /**
      * Job data
-     * @var array
      */
-    protected $data = [];
+    protected array $data = [];
 
     /**
      * Job retry count
-     * @var int
      */
-    protected $retries;
+    protected int $retries;
 
     /**
      * Job unique ID
-     * @var string
      */
-    protected $uid;
+    protected string $uid;
 
     /**
      * Failed flag
-     * @var bool
      */
-    protected $failed;
+    protected bool $failed;
 
     /**
      * Constructor
@@ -50,6 +47,9 @@ abstract class AbstractJob implements JobInterface, QueueAwareInterface {
      * @param int    $retries Job retry count
      */
     public function __construct(string $uid, array $data = [], int $retries = 0) {
+        if (! $uid ) {
+            throw new InvalidArgumentException('UID can not be empty');
+        }
         $this->uid = $uid;
         $this->data = $data;
         $this->retries = (int) $retries;
@@ -57,34 +57,28 @@ abstract class AbstractJob implements JobInterface, QueueAwareInterface {
     }
 
     /**
-     * Get job unique ID
-     * @return string
+     * @inheritdoc
      */
     public function getUID(): string {
         return $this->uid;
     }
 
     /**
-     * Get job data
-     * @param  string $key     Item key
-     * @param  mixed  $default Item default
-     * @return mixed
+     * @inheritdoc
      */
     public function getData(string $key = '', $default = null) {
         return $key ? ( $this->data[$key] ?? $default ) : $this->data;
     }
 
     /**
-     * Get job retry count
-     * @return int
+     * @inheritdoc
      */
     public function getRetries(): int {
         return $this->retries;
     }
 
     /**
-     * Has the job failed?
-     * @return bool
+     * @inheritdoc
      */
     public function hasFailed(): bool {
         return $this->failed;
@@ -92,7 +86,6 @@ abstract class AbstractJob implements JobInterface, QueueAwareInterface {
 
     /**
      * Complete the job
-     * @return bool
      */
     public function complete(): bool {
         $adapter = $this->queue->getAdapter();
@@ -102,7 +95,6 @@ abstract class AbstractJob implements JobInterface, QueueAwareInterface {
 
     /**
      * Fail the job
-     * @return bool
      */
     public function failed(): bool {
         $adapter = $this->queue->getAdapter();
@@ -113,7 +105,6 @@ abstract class AbstractJob implements JobInterface, QueueAwareInterface {
 
     /**
      * Retry the job
-     * @return void
      */
     public function retry(): void {
         $adapter = $this->queue->getAdapter();

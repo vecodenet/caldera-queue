@@ -33,7 +33,6 @@ trait QueueAware {
 
     /**
      * Get current Queue
-     * @return ?Queue
      */
     public function getQueue(): ?Queue {
         return $this->queue;
