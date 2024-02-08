@@ -23,15 +23,13 @@ class RedisAdapter extends AbstractAdapter {
 
     /**
      * List prefix
-     * @var string
      */
-    protected $prefix;
+    protected string $prefix;
 
     /**
      * Client instance
-     * @var Client
      */
-    protected $client;
+    protected Client $client;
 
     /**
      * Constructor
@@ -44,10 +42,7 @@ class RedisAdapter extends AbstractAdapter {
     }
 
     /**
-     * Add a job to the queue
-     * @param  string $type Job type
-     * @param  mixed  $data Job data
-     * @return string
+     * @inheritdoc
      */
     public function add(string $type, $data): string {
         $uid = $this->generateUID();
@@ -67,8 +62,7 @@ class RedisAdapter extends AbstractAdapter {
     }
 
     /**
-     * Get a pending job to work on it
-     * @return ?JobInterface
+     * @inheritdoc
      */
     public function get(): ?JobInterface {
         $ret = null;
@@ -97,9 +91,7 @@ class RedisAdapter extends AbstractAdapter {
     }
 
     /**
-     * Delete the specified job from the queue (as it is completed)
-     * @param  string $uid Job identifier
-     * @return void
+     * @inheritdoc
      */
     public function complete(string $uid): void {
         # Get the index of the job
@@ -115,9 +107,7 @@ class RedisAdapter extends AbstractAdapter {
     }
 
     /**
-     * Mark the specified job as failed
-     * @param  string $uid Job identifier
-     * @return void
+     * @inheritdoc
      */
     public function failed(string $uid): void {
         # Get the index of the job
@@ -137,9 +127,7 @@ class RedisAdapter extends AbstractAdapter {
     }
 
     /**
-     * Retry an specific job
-     * @param  string $uid Job identifier
-     * @return void
+     * @inheritdoc
      */
     public function retry(string $uid): void {
         # Get the index of the job
@@ -165,9 +153,7 @@ class RedisAdapter extends AbstractAdapter {
     }
 
     /**
-     * Get the pending job count
-     * @param  string $type Job typeq
-     * @return int
+     * @inheritdoc
      */
     public function pending(string $type = ''): int {
         $ret = $this->client->llen("{$this->prefix}:queue:pending");
@@ -175,9 +161,7 @@ class RedisAdapter extends AbstractAdapter {
     }
 
     /**
-     * Reset failed jobs
-     * @param  string $type Job type
-     * @return void
+     * @inheritdoc
      */
     public function reset(string $type = ''): void {
         while ( $value = $this->client->rpop("{$this->prefix}:queue:failed") ) {
@@ -198,9 +182,7 @@ class RedisAdapter extends AbstractAdapter {
     }
 
     /**
-     * Purge failed jobs
-     * @param  string $type Job type
-     * @return void
+     * @inheritdoc
      */
     public function purge(string $type = ''): void {
         while ( $value = $this->client->rpop("{$this->prefix}:queue:failed") ) {

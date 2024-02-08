@@ -15,7 +15,6 @@ interface JobInterface {
 
     /**
      * Get job unique ID
-     * @return string
      */
     public function getUID(): string;
 
@@ -29,13 +28,11 @@ interface JobInterface {
 
     /**
      * Get job retry count
-     * @return int
      */
     public function getRetries(): int;
 
     /**
      * Has the job failed?
-     * @return bool
      */
     public function hasFailed(): bool;
 

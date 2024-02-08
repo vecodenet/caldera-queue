@@ -24,7 +24,6 @@ interface QueueAwareInterface {
 
     /**
      * Get current Queue
-     * @return ?Queue
      */
     public function getQueue(): ?Queue;
 }
