@@ -16,10 +16,11 @@ use RuntimeException;
 
 use Predis\Client;
 
+use PHPUnit\Framework\TestCase;
+
 use Caldera\Queue\Adapter\RedisAdapter;
 use Caldera\Queue\JobInterface;
 use Caldera\Queue\Queue;
-use PHPUnit\Framework\TestCase;
 
 class QueueWithRedisAdapterTest extends TestCase {
 

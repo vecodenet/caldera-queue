@@ -11,8 +11,6 @@ declare(strict_types = 1);
 
 namespace Caldera\Queue;
 
-use Caldera\Queue\Queue;
-
 interface QueueAwareInterface {
 
     /**
@@ -20,7 +18,7 @@ interface QueueAwareInterface {
      * @param  Queue $queue Queue instance
      * @return $this
      */
-    public function setQueue(Queue $queue);
+    public function setQueue(Queue $queue): self;
 
     /**
      * Get current Queue

@@ -18,7 +18,6 @@ use Caldera\Database\Schema\Schema;
 use Caldera\Database\Query\Argument;
 use Caldera\Database\Query\Query;
 
-use Caldera\Queue\Adapter\AbstractAdapter;
 use Caldera\Queue\JobInterface;
 use Caldera\Queue\QueueAwareInterface;
 
@@ -53,7 +52,7 @@ class DatabaseAdapter extends AbstractAdapter {
     /**
      * @inheritdoc
      */
-    public function add(string $type, $data): string {
+    public function add(string $type, mixed $data): string {
         $ret = null;
         $uid = $this->generateUID();
         $row = [

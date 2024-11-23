@@ -19,27 +19,25 @@ class TestJob extends AbstractJob {
 
 	/**
 	 * The handler function, must be implemented
-	 * @return mixed
 	 */
-	public function handle() {
+	public function handle(): void {
 		$user = $this->getData('user');
 		switch ($user->id) {
 			case 1:
-				return $this->complete();
-			break;
+				$this->complete();
+            break;
 			case 2:
-				return $this->failed();
-			break;
+				$this->failed();
+            break;
 			case 3:
 				if ($this->retries < 3) {
-					return $this->retry();
+					$this->retry();
 				} else {
-					return $this->failed();
+					$this->failed();
 				}
-			break;
+            break;
 			case 4:
 				throw new RuntimeException('Can not do');
-			break;
 		}
 	}
 }

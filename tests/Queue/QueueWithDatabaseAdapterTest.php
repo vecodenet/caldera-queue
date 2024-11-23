@@ -14,17 +14,24 @@ namespace Caldera\Tests\Queue;
 use Exception;
 use RuntimeException;
 
+use PHPUnit\Framework\TestCase;
+
 use Caldera\Database\Adapter\MySQLAdapter;
 use Caldera\Database\Database;
+use Caldera\Events\EventDispatcher;
+use Caldera\Events\Listener\CallableListener;
+use Caldera\Events\ListenerProvider;
 
 use Caldera\Queue\Adapter\DatabaseAdapter;
+use Caldera\Queue\Events\JobCompletedEvent;
+use Caldera\Queue\Events\JobExceptionOcurredEvent;
+use Caldera\Queue\Events\JobFailedEvent;
 use Caldera\Queue\JobInterface;
 use Caldera\Queue\Queue;
-use PHPUnit\Framework\TestCase;
 
 class QueueWithDatabaseAdapterTest extends TestCase {
 
-	static protected $database;
+	static protected Database $database;
 
 	public static function setUpBeforeClass(): void {
 		$options = [
@@ -67,8 +74,20 @@ class QueueWithDatabaseAdapterTest extends TestCase {
 
 	function testWork() {
 		$counter = 0;
+        $provider = new ListenerProvider();
+        $provider->add(JobCompletedEvent::class, new CallableListener(function(JobCompletedEvent $event) {
+            $this->assertFalse($event->getJob()->hasFailed());
+        }));
+        $provider->add(JobFailedEvent::class, new CallableListener(function(JobFailedEvent $event) {
+            $this->assertInstanceOf(RuntimeException::class, $event->getException());
+        }));
+        $provider->add(JobExceptionOcurredEvent::class, new CallableListener(function(JobExceptionOcurredEvent $event) {
+            $this->assertInstanceOf(RuntimeException::class, $event->getException());
+        }));
+        $dispatcher = new EventDispatcher($provider);
+		#
 		$adapter = new DatabaseAdapter(self::$database);
-		$queue = new Queue($adapter);
+		$queue = new Queue($adapter, $dispatcher);
 		#
 		$queue->work(function(JobInterface $job) use (&$counter) {
 			$counter++;

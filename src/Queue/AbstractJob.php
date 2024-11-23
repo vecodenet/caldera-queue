@@ -11,9 +11,6 @@ declare(strict_types = 1);
 
 namespace Caldera\Queue;
 
-use Caldera\Queue\QueueAware;
-use Caldera\Queue\QueueAwareInterface;
-use Caldera\Queue\JobInterface;
 use InvalidArgumentException;
 
 abstract class AbstractJob implements JobInterface, QueueAwareInterface {
@@ -47,9 +44,7 @@ abstract class AbstractJob implements JobInterface, QueueAwareInterface {
      * @param int    $retries Job retry count
      */
     public function __construct(string $uid, array $data = [], int $retries = 0) {
-        if (! $uid ) {
-            throw new InvalidArgumentException('UID can not be empty');
-        }
+        if (! $uid ) throw new InvalidArgumentException('UID can not be empty');
         $this->uid = $uid;
         $this->data = $data;
         $this->retries = (int) $retries;
@@ -66,7 +61,7 @@ abstract class AbstractJob implements JobInterface, QueueAwareInterface {
     /**
      * @inheritdoc
      */
-    public function getData(string $key = '', $default = null) {
+    public function getData(string $key = '', mixed $default = null): mixed {
         return $key ? ( $this->data[$key] ?? $default ) : $this->data;
     }
 
@@ -88,8 +83,7 @@ abstract class AbstractJob implements JobInterface, QueueAwareInterface {
      * Complete the job
      */
     public function complete(): bool {
-        $adapter = $this->queue->getAdapter();
-        $adapter->complete($this->uid);
+        $this->queue->complete($this);
         return true;
     }
 
@@ -97,9 +91,8 @@ abstract class AbstractJob implements JobInterface, QueueAwareInterface {
      * Fail the job
      */
     public function failed(): bool {
-        $adapter = $this->queue->getAdapter();
-        $adapter->failed($this->uid);
         $this->failed = true;
+        $this->queue->failed($this);
         return false;
     }
 
@@ -107,7 +100,6 @@ abstract class AbstractJob implements JobInterface, QueueAwareInterface {
      * Retry the job
      */
     public function retry(): void {
-        $adapter = $this->queue->getAdapter();
-        $adapter->retry($this->uid);
+        $this->queue->retry($this);
     }
 }

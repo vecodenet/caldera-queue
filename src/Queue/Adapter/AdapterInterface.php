@@ -20,7 +20,7 @@ interface AdapterInterface {
      * @param  string $type Job type
      * @param  mixed  $data Job data
      */
-    public function add(string $type, $data): string;
+    public function add(string $type, mixed $data): string;
 
     /**
      * Get a pending job to work on it
@@ -47,7 +47,7 @@ interface AdapterInterface {
 
     /**
      * Get the pending job count
-     * @param  string $type Job typeq
+     * @param  string $type Job type
      */
     public function pending(string $type = ''): int;
 

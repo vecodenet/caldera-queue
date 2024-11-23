@@ -14,9 +14,17 @@ namespace Caldera\Queue;
 use Closure;
 use Exception;
 
+use Psr\EventDispatcher\EventDispatcherInterface;
+
 use Caldera\Queue\Adapter\AdapterInterface;
-use Caldera\Queue\JobInterface;
-use Caldera\Queue\QueueAwareInterface;
+use Caldera\Queue\Events\JobCompletedEvent;
+use Caldera\Queue\Events\JobExceptionOcurredEvent;
+use Caldera\Queue\Events\JobFailedEvent;
+use Caldera\Queue\Events\JobProcessedEvent;
+use Caldera\Queue\Events\JobProcessingEvent;
+use Caldera\Queue\Events\JobRetryRequestedEvent;
+use Caldera\Queue\Events\WorkerStartedEvent;
+use Caldera\Queue\Events\WorkerStoppingEvent;
 
 class Queue {
 
@@ -26,11 +34,17 @@ class Queue {
     protected AdapterInterface $adapter;
 
     /**
+     * EventDispatcherInterface implementation
+     */
+    protected ?EventDispatcherInterface $dispatcher;
+
+    /**
      * Constructor
      * @param AdapterInterface $adapter Queue adapter
      */
-    public function __construct(AdapterInterface $adapter) {
+    public function __construct(AdapterInterface $adapter, EventDispatcherInterface $dispatcher = null) {
         $this->adapter = $adapter;
+        $this->dispatcher = $dispatcher;
         if ($this->adapter instanceof QueueAwareInterface) {
             $this->adapter->setQueue($this);
         }
@@ -48,7 +62,7 @@ class Queue {
      * @param  string $type Job type
      * @param  mixed  $data Job data
      */
-    public function add(string $type, $data): string {
+    public function add(string $type, mixed $data): string {
         return $this->adapter->add($type, $data);
     }
 
@@ -72,7 +86,7 @@ class Queue {
      * @param  string $type Job type
      * @return $this
      */
-    public function reset(string $type = '') {
+    public function reset(string $type = ''): self {
         $this->adapter->reset($type);
         return $this;
     }
@@ -82,27 +96,29 @@ class Queue {
      * @param  string $type Job type
      * @return $this
      */
-    public function purge(string $type = '') {
+    public function purge(string $type = ''): self {
         $this->adapter->purge($type);
         return $this;
     }
 
     /**
      * Do queue work
-     * @param  Closure $callback Callback closure
-     * @param  Closure $complete Completion closure
+     * @param ?Closure $callback Callback closure
+     * @param ?Closure $complete Completion closure
      */
     public function work(Closure $callback = null, Closure $complete = null): void {
+        $this->dispatcher?->dispatch(new WorkerStartedEvent());
         while (true) {
             if ( $this->pending() ) {
                 $job = $this->get();
+                $this->dispatcher?->dispatch(new JobProcessingEvent($job));
                 try {
-                    if ( $job->handle() === true ) {
-                        $this->adapter->complete( $job->getUID() );
-                    }
+                    $job->handle();
                 } catch (Exception $e) {
-                    $this->adapter->failed( $job->getUID() );
+                    $this->dispatcher?->dispatch(new JobExceptionOcurredEvent($job, $e));
+                    $this->failed($job, $e);
                 }
+                $this->dispatcher?->dispatch(new JobProcessedEvent($job));
                 if ($callback) {
                     $ret = $callback($job);
                     if ($ret === false) {
@@ -119,5 +135,34 @@ class Queue {
                 }
             }
         }
+        $this->dispatcher?->dispatch(new WorkerStoppingEvent());
+    }
+
+    /**
+     * Mark job as complete
+     * @param JobInterface $job
+     */
+    public function complete(JobInterface $job): void {
+        $this->adapter->complete( $job->getUID() );
+        $this->dispatcher?->dispatch(new JobCompletedEvent($job));
+    }
+
+    /**
+     * Mark job as failed
+     * @param JobInterface $job
+     * @param ?Exception   $exception
+     */
+    public function failed(JobInterface $job, ?Exception $exception = null): void {
+        $this->adapter->failed( $job->getUID() );
+        $this->dispatcher?->dispatch(new JobFailedEvent($job, $exception));
+    }
+
+    /**
+     * Request job retry
+     * @param JobInterface $job
+     */
+    public function retry(JobInterface $job): void {
+        $this->adapter->retry( $job->getUID() );
+        $this->dispatcher?->dispatch(new JobRetryRequestedEvent($job));
     }
 }

@@ -15,9 +15,8 @@ class DummyJob {
 
 	/**
 	 * The handler function, must be implemented
-	 * @return mixed
 	 */
-	public function handle() {
+	public function handle(): void {
 		# This will not work
 	}
 }

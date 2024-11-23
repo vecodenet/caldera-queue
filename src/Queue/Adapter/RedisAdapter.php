@@ -15,7 +15,6 @@ use RuntimeException;
 
 use Predis\Client;
 
-use Caldera\Queue\Adapter\AbstractAdapter;
 use Caldera\Queue\JobInterface;
 use Caldera\Queue\QueueAwareInterface;
 
@@ -44,7 +43,7 @@ class RedisAdapter extends AbstractAdapter {
     /**
      * @inheritdoc
      */
-    public function add(string $type, $data): string {
+    public function add(string $type, mixed $data): string {
         $uid = $this->generateUID();
         $item = [
             'uid' => $uid,

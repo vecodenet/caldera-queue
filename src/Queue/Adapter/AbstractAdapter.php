@@ -11,7 +11,6 @@ declare(strict_types = 1);
 
 namespace Caldera\Queue\Adapter;
 
-use Caldera\Queue\Adapter\AdapterInterface;
 use Caldera\Queue\QueueAware;
 use Caldera\Queue\QueueAwareInterface;
 

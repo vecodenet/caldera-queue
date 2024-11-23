@@ -22,9 +22,8 @@ interface JobInterface {
      * Get job data
      * @param  string $key     Item key
      * @param  mixed  $default Item default
-     * @return mixed
      */
-    public function getData(string $key = '', $default = null);
+    public function getData(string $key = '', mixed $default = null): mixed;
 
     /**
      * Get job retry count
@@ -38,7 +37,6 @@ interface JobInterface {
 
     /**
      * The handler function, must be implemented
-     * @return mixed
      */
-    public function handle();
+    public function handle(): void;
 }

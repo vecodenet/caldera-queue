@@ -11,22 +11,18 @@ declare(strict_types = 1);
 
 namespace Caldera\Queue;
 
-use Caldera\Queue\Queue;
-
 trait QueueAware {
 
     /**
      * Queue instance
-     * @var Queue
      */
-    protected $queue;
+    protected Queue $queue;
 
     /**
      * Set current Queue
-     * @param  Queue $queue Queue instance
-     * @return $this
+     * @param Queue $queue Queue instance
      */
-    public function setQueue(Queue $queue) {
+    public function setQueue(Queue $queue): self {
         $this->queue = $queue;
         return $this;
     }
